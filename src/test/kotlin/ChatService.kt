@@ -51,8 +51,7 @@ class ChatService {
     //Попытка удалить несуществующий чат
     @Test(expected = ChatNotFound::class)
     fun deleteNonexistentChat() {
-        val result = ChatService.deleteChat(73)
-        Assert.assertEquals(true, result)
+        ChatService.deleteChat(73)
     }
 
     //Отредактируем существующее сообщение
