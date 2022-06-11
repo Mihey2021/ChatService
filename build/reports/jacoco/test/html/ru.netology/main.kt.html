@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>main.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatService</a> &gt; <a href="index.source.html" class="el_package">ru.netology</a> &gt; <span class="el_source">main.kt</span></div><h1>main.kt</h1><pre class="source lang-java linenums">package ru.netology
+
+import ru.netology.data.Users
+import ru.netology.exceptions.ChatNotFound
+import ru.netology.exceptions.MessageNotFound
+import ru.netology.services.ChatService
+
+fun main(args: Array&lt;String&gt;) {
+<span class="nc" id="L9">    val userYou = Users(0, &quot;Р’С‹&quot;)</span>
+<span class="nc" id="L10">    val userAleksandr = Users(1, &quot;РЎР°С€Р°&quot;)</span>
+<span class="nc" id="L11">    val userTanya = Users(2, &quot;РўР°РЅСЏ&quot;)</span>
+<span class="nc" id="L12">    val userIgor = Users(3, &quot;Р�РіРѕСЂСЊ&quot;)</span>
+<span class="nc" id="L13">    val userNadya = Users(4, &quot;РќР°РґСЏ&quot;)</span>
+<span class="nc" id="L14">    val userEgor = Users(5, &quot;Р•РіРѕСЂ&quot;)</span>
+
+<span class="nc" id="L16">    ChatService.sendMessage(userYou, userAleksandr, &quot;РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚ Р’Р°СЃ РґР»СЏ РђР»РµРєСЃР°РЅРґСЂР°&quot;)</span>
+<span class="nc" id="L17">    ChatService.sendMessage(userNadya, userYou, &quot;РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚ РќР°РґРё РґР»СЏ Р’Р°СЃ&quot;)</span>
+<span class="nc" id="L18">    ChatService.sendMessage(userEgor, userYou, &quot;РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚ Р•РіРѕСЂР° РґР»СЏ Р’Р°СЃ&quot;)</span>
+<span class="nc" id="L19">    ChatService.sendMessage(userYou, userNadya, &quot;Р’Р°С€ РѕС‚РІРµС‚ РќР°РґРµ&quot;)</span>
+<span class="nc" id="L20">    ChatService.sendMessage(userYou, userTanya, &quot;РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚ Р’Р°СЃ РґР»СЏ РўР°РЅРё&quot;)</span>
+<span class="nc" id="L21">    ChatService.sendMessage(userIgor, userYou, &quot;РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚ Р�РіРѕСЂСЏ РґР»СЏ Р’Р°СЃ&quot;)</span>
+<span class="nc" id="L22">    ChatService.sendMessage(userYou, userIgor, &quot;Р’Р°С€ РѕС‚РІРµС‚ Р�РіРѕСЂСЋ&quot;)</span>
+
+<span class="nc" id="L24">    printChatListAndMessages(userYou)</span>
+
+<span class="nc" id="L26">    println(&quot;\nРЈРґР°Р»РµРЅРёРµ С‡Р°С‚Р° СЃ Id = 3&quot;)</span>
+<span class="nc" id="L27">    ChatService.deleteChat(3)</span>
+<span class="nc" id="L28">    ChatService.getAllChatsForUser(userYou).forEach { println(it) }</span>
+<span class="nc" id="L29">    printChatListAndMessages(userYou)</span>
+
+<span class="nc" id="L31">    println(&quot;\nРџРѕРїСЂРѕР±СѓРµРј СѓРґР°Р»РёС‚СЊ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С‡Р°С‚&quot;)</span>
+<span class="nc" id="L32">    try {</span>
+<span class="nc" id="L33">        ChatService.deleteChat(73)</span>
+<span class="nc" id="L34">    } catch (e: ChatNotFound) {</span>
+<span class="nc" id="L35">        println(e.message)</span>
+    }
+
+
+<span class="nc" id="L39">    println(&quot;\nРћС‚СЂРµРґР°РєС‚РёСЂСѓРµРј СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ&quot;)</span>
+<span class="nc" id="L40">    ChatService.editMessage(3, &quot;Р’Р°С€ РѕС‚РІРµС‚ РќР°РґРµ (Р�Р—РњР•РќР•РќРќР«Р™)&quot;)</span>
+<span class="nc" id="L41">    printChatListAndMessages(userYou)</span>
+
+<span class="nc" id="L43">    println(&quot;\nРџРѕРїСЂРѕР±СѓРµРј РѕС‚СЂРµРґР°РєС‚РёСЂРѕРІР°С‚СЊ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ&quot;)</span>
+<span class="nc" id="L44">    try {</span>
+<span class="nc" id="L45">        ChatService.editMessage(16, &quot;РќРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ&quot;)</span>
+<span class="nc" id="L46">    } catch (e: MessageNotFound) {</span>
+<span class="nc" id="L47">        println(e.message)</span>
+    }
+
+<span class="nc" id="L50">    println(&quot;\nРЈРґР°Р»РёРј СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ РІ С‡Р°С‚Рµ&quot;)</span>
+<span class="nc" id="L51">    ChatService.deleteMessage(5)</span>
+<span class="nc" id="L52">    printChatListAndMessages(userYou)</span>
+<span class="nc" id="L53">    println(&quot;\nРЈРґР°Р»РёРј СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ РІ С‡Р°С‚Рµ (РѕСЃС‚Р°РІС€РµРµСЃСЏ)&quot;)</span>
+<span class="nc" id="L54">    ChatService.deleteMessage(6)</span>
+<span class="nc" id="L55">    printChatListAndMessages(userYou)</span>
+
+<span class="nc" id="L57">    println(&quot;\nРџРѕРїСЂРѕР±СѓРµРј СѓРґР°Р»РёС‚СЊ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ&quot;)</span>
+<span class="nc" id="L58">    try {</span>
+<span class="nc" id="L59">        ChatService.deleteMessage(5)</span>
+<span class="nc" id="L60">    } catch (e: MessageNotFound) {</span>
+<span class="nc" id="L61">        println(e.message)</span>
+    }
+
+<span class="nc" id="L64">    ChatService.sendMessage(userTanya, userYou, &quot;РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚ РўР°РЅРё РґР»СЏ Р’Р°СЃ&quot;)</span>
+<span class="nc" id="L65">    ChatService.sendMessage(userNadya, userYou, &quot;РћС‚РІРµС‚ РќР°РґРё РЅР° Р’Р°С€Рµ СЃРѕРѕР±РµС‰РЅРёРµ&quot;)</span>
+<span class="nc" id="L66">    println(&quot;РљРѕР»РёС‡РµСЃС‚РІРѕ РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹С… С‡Р°С‚РѕРІ: ${ChatService.getUnreadChatsCount(userYou.id)}&quot;)</span>
+
+<span class="nc" id="L68">    printChatListAndMessages(userYou)</span>
+
+<span class="nc" id="L70">    println(&quot;\nРџРѕР»СѓС‡РёРј 2 СЃРѕРѕР±С‰РµРЅРёСЏ РёР· С‡Р°С‚Р° СЃ РќР°РґРµР№:&quot;)</span>
+<span class="nc" id="L71">    ChatService.getMessagesFromChat(1, 1, 2)</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        .forEach { println(&quot; - ${it.text} [${if (it.read) &quot;РџСЂРѕС‡РёС‚Р°РЅРѕ&quot; else &quot;РќРµ РїСЂРѕС‡РёС‚Р°РЅРѕ&quot;}]&quot;) }</span>
+
+
+
+<span class="nc" id="L76">    try {</span>
+<span class="nc" id="L77">        println(&quot;\nРџРѕРїСЂРѕР±СѓРµРј РїРѕР»СѓС‡РёС‚СЊ 5 СЃРѕРѕР±С‰РµРЅРёР№ РёР· РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ С‡Р°С‚Р°:&quot;)</span>
+<span class="nc" id="L78">        ChatService.getMessagesFromChat(12, 0, 5)</span>
+<span class="nc" id="L79">    } catch (e: ChatNotFound) {</span>
+<span class="nc" id="L80">        println(e.message)</span>
+    }
+
+<span class="nc" id="L83">}</span>
+
+fun printChatListAndMessages(user: Users) {
+<span class="nc" id="L86">    val allYourChatsList = ChatService.getAllChatsForUser(user)</span>
+<span class="nc" id="L87">    println(&quot;\nР§Р°С‚С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ [${user.name}]: &quot;)</span>
+<span class="nc" id="L88">    allYourChatsList.forEach {</span>
+<span class="nc" id="L89">        println(&quot;\n$it&quot;)</span>
+<span class="nc" id="L90">        ChatService.getAllMessagesFromChat(it.id)</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            .forEach { msg -&gt; println(&quot;    - ${msg.text} [${if (msg.read) &quot;РџСЂРѕС‡РёС‚Р°РЅРѕ&quot; else &quot;РќРµ РїСЂРѕС‡РёС‚Р°РЅРѕ&quot;}]&quot;) }</span>
+<span class="nc" id="L92">    }</span>
+<span class="nc" id="L93">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
