@@ -15,105 +15,116 @@ object ChatService {
 
     fun sendMessage(senderUser: Users, receiverUser: Users, text: String): Boolean {
 
-<span class="fc" id="L18">        var filterChatsList = getChatList(senderUser, receiverUser)</span>
+<span class="fc" id="L18">        val filterChatsList = getChatList(senderUser, receiverUser)</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">            .ifEmpty { listOf(createChat(senderUser, receiverUser)) }</span>
 
-        //РџСЂРѕРІРµСЂРёРј РµСЃС‚СЊ Р»Рё СЂР°РЅРµРµ СЃРѕР·РґР°РЅРЅС‹Р№ С‡Р°С‚ РјРµР¶РґСѓ СЌС‚РёРјРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРјРё Рё СЃРѕР·РґР°РґРёРј РµРіРѕ, РµСЃР»Рё С‚Р°РєРѕРіРѕ С‡Р°С‚Р° РЅРµС‚
-<span class="fc bfc" id="L21" title="All 2 branches covered.">        if (filterChatsList.isEmpty()) {</span>
-<span class="fc" id="L22">            createChat(senderUser, receiverUser)</span>
-<span class="fc" id="L23">            filterChatsList = getChatList(senderUser, receiverUser)</span>
-        }
-
-<span class="fc" id="L26">        val currentChat = filterChatsList[0]</span>
-<span class="fc bfc" id="L27" title="All 2 branches covered.">        val msgId = if (messagesList.isEmpty()) 0 else messagesList.last().id + 1</span>
+<span class="fc" id="L21">        val currentChat = filterChatsList[0]</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        val msgId = if (messagesList.isEmpty()) 0 else messagesList.last().id + 1</span>
         //Р”РѕР±Р°РІРёРј СЃРѕРѕР±С‰РµРЅРёРµ РІ С‡Р°С‚
-<span class="fc" id="L29">        val msgSend = messagesList.add(Messages(msgId, currentChat.id, senderUser.id, receiverUser.id, text))</span>
+<span class="fc" id="L24">        val msgSend = messagesList.add(Messages(msgId, currentChat.id, senderUser.id, receiverUser.id, text))</span>
 
         //РћС‚РјРµС‚РёРј РІ СЌС‚РѕРј С‡Р°С‚Рµ РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ РІС…РѕРґСЏС‰РёРµ СЃРѕРѕР±С‰РµРЅРёСЏ РєР°Рє РїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ (РµСЃР»Рё РѕС‚РІРµС‡Р°РµРј, Р·РЅР°С‡РёС‚ РїСЂРѕС‡РёС‚Р°Р»Рё РІС…РѕРґСЏС‰РёРµ)
-<span class="fc" id="L32">        markMessagesAsRead(currentChat.id, senderUser.id)</span>
+<span class="fc" id="L27">        markMessagesAsRead(currentChat.id, senderUser.id)</span>
 
-<span class="fc" id="L34">        return msgSend</span>
+<span class="fc" id="L29">        return msgSend</span>
     }
 
     fun getChatList(senderUser: Users, receiverUser: Users) =
-<span class="fc bfc" id="L38" title="All 6 branches covered.">        chatsList.filter { it.memberUsers == senderUser vs receiverUser || it.memberUsers == receiverUser vs senderUser }</span>
+<span class="fc bfc" id="L33" title="All 6 branches covered.">        chatsList.filter { it.memberUsers == senderUser vs receiverUser || it.memberUsers == receiverUser vs senderUser }</span>
 
     fun getAllChatsForUser(user: Users) =
-<span class="pc bpc" id="L41" title="2 of 6 branches missed.">        chatsList.filter { it.memberUsers.user1 == user || it.memberUsers.user2 == user }</span>
+<span class="pc bpc" id="L36" title="2 of 6 branches missed.">        chatsList.filter { it.memberUsers.user1 == user || it.memberUsers.user2 == user }</span>
 
-    fun createChat(senderUser: Users, receiverUser: Users): Boolean {
-<span class="fc bfc" id="L44" title="All 2 branches covered.">        val chatId = if (chatsList.isEmpty()) 0 else chatsList.last().id + 1</span>
-<span class="fc" id="L45">        return chatsList.add(Chat(chatId, senderUser vs receiverUser))</span>
+    fun createChat(senderUser: Users, receiverUser: Users): Chat {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        val chatId = if (chatsList.isEmpty()) 0 else chatsList.last().id + 1</span>
+<span class="fc" id="L40">        val newChat = Chat(chatId, senderUser vs receiverUser)</span>
+<span class="fc" id="L41">        chatsList.add(newChat)</span>
+<span class="fc" id="L42">        return newChat</span>
     }
 
     fun markMessagesAsRead(chatId: Int, receiverId: Int) {
-<span class="fc bfc" id="L49" title="All 8 branches covered.">        messagesList.filter { it.chatId == chatId &amp;&amp; !it.read &amp;&amp; it.receiverId == receiverId }</span>
-<span class="fc" id="L50">            .forEach { it.read = true }</span>
-<span class="fc" id="L51">    }</span>
+<span class="fc bfc" id="L46" title="All 8 branches covered.">        messagesList.filter { it.chatId == chatId &amp;&amp; !it.read &amp;&amp; it.receiverId == receiverId }</span>
+<span class="fc" id="L47">            .forEach { it.read = true }</span>
+<span class="fc" id="L48">    }</span>
 
     @Throws(ChatNotFound::class)
     fun deleteChat(chatId: Int): Boolean {
-<span class="fc bfc" id="L55" title="All 4 branches covered.">        val filterChatList = chatsList.filter { it.id == chatId }.toList()</span>
-<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (filterChatList.isEmpty()) throw ChatNotFound(&quot;вњ– Р§Р°С‚ РЅРµ РЅР°Р№РґРµРЅ!&quot;)</span>
-<span class="fc bfc" id="L57" title="All 4 branches covered.">        val filterMessagesList = messagesList.filter { it.chatId == chatId }.toList()</span>
-<span class="fc" id="L58">        filterMessagesList.forEach { messagesList.remove(it) }</span>
-<span class="fc" id="L59">        filterChatList.forEach { chatsList.remove(it) }</span>
+<span class="fc" id="L52">        chatsList</span>
+<span class="fc bfc" id="L53" title="All 4 branches covered.">            .filter { it.id == chatId }</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            .ifEmpty { throw ChatNotFound(&quot;вњ– Р§Р°С‚ РЅРµ РЅР°Р№РґРµРЅ!&quot;) }</span>
+<span class="fc" id="L55">            .forEach { chatsList.remove(it) }</span>
+
+<span class="fc" id="L57">        messagesList</span>
+<span class="fc bfc" id="L58" title="All 4 branches covered.">            .filter { it.chatId == chatId }</span>
+<span class="fc" id="L59">            .forEach { messagesList.remove(it) }</span>
 <span class="fc" id="L60">        return true</span>
     }
 
     @Throws(MessageNotFound::class)
     fun editMessage(messageId: Int, newText: String): Messages {
-<span class="fc bfc" id="L65" title="All 4 branches covered.">        val filterMessagesList = messagesList.filter { it.id == messageId }</span>
+<span class="fc" id="L65">        val filterMessagesList = messagesList</span>
+<span class="fc bfc" id="L66" title="All 4 branches covered.">            .filter { it.id == messageId }</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            .ifEmpty { throw MessageNotFound(&quot;вњ– РЎРѕРѕР±С‰РµРЅРёРµ РЅРµ РЅР°Р№РґРµРЅРѕ!&quot;) }</span>
 
-<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (filterMessagesList.isEmpty()) throw MessageNotFound(&quot;вњ– РЎРѕРѕР±С‰РµРЅРёРµ РЅРµ РЅР°Р№РґРµРЅРѕ!&quot;)</span>
-<span class="fc" id="L68">        var msg = filterMessagesList[0].copy(text = newText)</span>
-<span class="fc" id="L69">        messagesList[messagesList.indexOf(filterMessagesList[0])] = msg</span>
-<span class="fc" id="L70">        return messagesList[messagesList.indexOf(msg)]</span>
+<span class="fc" id="L69">        val msg = filterMessagesList[0].copy(text = newText)</span>
+<span class="fc" id="L70">        messagesList[messagesList.indexOf(filterMessagesList[0])] = msg</span>
+<span class="fc" id="L71">        return messagesList[messagesList.indexOf(msg)]</span>
     }
 
     @Throws(MessageNotFound::class)
     fun deleteMessage(msgId: Int): Boolean {
-<span class="fc bfc" id="L75" title="All 4 branches covered.">        val filterMessagesList = messagesList.filter { it.id == msgId }</span>
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (filterMessagesList.isEmpty()) throw MessageNotFound(&quot;вњ– РЎРѕРѕР±С‰РµРЅРёРµ РЅРµ РЅР°Р№РґРµРЅРѕ!&quot;)</span>
-<span class="fc" id="L77">        val msg = filterMessagesList[0]</span>
-<span class="fc bfc" id="L78" title="All 4 branches covered.">        val filterMessagesInChat = messagesList.filter { it.chatId == msg.chatId }</span>
-        //Р•СЃР»Рё СЌС‚Рѕ РµРґРёРЅСЃС‚РІРµРЅРЅРѕРµ РѕСЃС‚Р°РІС€РµРµСЃСЏ СЃРѕРѕР±С‰РµРЅРёРµ РІ С‡Р°С‚Рµ, СѓРґР°Р»РёРј РІРµСЃСЊ С‡Р°С‚
-<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (filterMessagesInChat.size == 1) {</span>
-<span class="fc bfc" id="L81" title="All 4 branches covered.">            val filterChatList = chatsList.filter { it.id == msg.chatId }</span>
-<span class="fc" id="L82">            println(&quot; вќ— Р­С‚Рѕ РµРґРёРЅСЃС‚РІРµРЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РІ С‡Р°С‚Рµ [${filterChatList[0]}]. РЈРґР°Р»СЏСЋ С‡Р°С‚.&quot;)</span>
-<span class="fc" id="L83">            deleteChat(msg.chatId)</span>
-<span class="fc" id="L84">            return true</span>
-        }
-<span class="fc" id="L86">        println(&quot;вњ” РЎРѕРѕР±С‰РµРЅРёРµ СѓРґР°Р»РµРЅРѕ&quot;)</span>
-<span class="fc" id="L87">        return messagesList.remove(msg)</span>
+<span class="fc" id="L76">        val msg = messagesList</span>
+<span class="fc bfc" id="L77" title="All 4 branches covered.">            .filter { msg -&gt; msg.id == msgId }</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            .ifEmpty { throw MessageNotFound(&quot;вњ– РЎРѕРѕР±С‰РµРЅРёРµ РЅРµ РЅР°Р№РґРµРЅРѕ!&quot;) }</span>
+<span class="fc" id="L79">            .let { messages -&gt; messages[0] }</span>
+<span class="fc" id="L80">            .run {</span>
+<span class="fc" id="L81">                messagesList</span>
+<span class="fc bfc" id="L82" title="All 4 branches covered.">                    .filter { it.chatId == this.chatId }</span>
+<span class="fc" id="L83">                    .also {</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">                        if (it.size == 1) {</span>
+<span class="fc bfc" id="L85" title="All 4 branches covered.">                            println(&quot; вќ— Р­С‚Рѕ РµРґРёРЅСЃС‚РІРµРЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РІ С‡Р°С‚Рµ [${chatsList.filter { it.id == this.chatId }[0]}]. РЈРґР°Р»СЏСЋ С‡Р°С‚.&quot;)</span>
+<span class="fc" id="L86">                            return deleteChat(this.chatId)</span>
+                        }
+<span class="fc" id="L88">                    }</span>
+<span class="fc" id="L89">                return@run this</span>
+            }
+
+<span class="fc" id="L92">        println(&quot;вњ” РЎРѕРѕР±С‰РµРЅРёРµ СѓРґР°Р»РµРЅРѕ&quot;)</span>
+<span class="fc" id="L93">        return messagesList.remove(msg)</span>
     }
 
-<span class="fc bfc" id="L90" title="All 4 branches covered.">    fun getAllMessagesFromChat(chatId: Int) = messagesList.filter { it.chatId == chatId }</span>
+<span class="fc bfc" id="L96" title="All 4 branches covered.">    fun getAllMessagesFromChat(chatId: Int) = messagesList.filter { it.chatId == chatId }</span>
 
     @Throws(ChatNotFound::class)
     fun getMessagesFromChat(chatId: Int, lastMessageId: Int, count: Int): List&lt;Messages&gt; {
-<span class="fc bfc" id="L94" title="All 6 branches covered.">        if (chatsList.filter { it.id == chatId }.isEmpty()) throw ChatNotFound(&quot;вњ– Р§Р°С‚ РЅРµ РЅР°Р№РґРµРЅ!&quot;)</span>
-<span class="fc bfc" id="L95" title="All 4 branches covered.">        val filterMessagesList = messagesList.filter { it.chatId == chatId }</span>
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        val totalCount = if (count &lt; 0) filterMessagesList.size else count</span>
-<span class="fc" id="L97">        val countRec =</span>
-<span class="pc bpc" id="L98" title="1 of 2 branches missed.">            if (filterMessagesList.size &gt;= lastMessageId + totalCount) lastMessageId + totalCount else filterMessagesList.size</span>
-<span class="fc" id="L99">        return filterMessagesList.subList(lastMessageId, countRec)</span>
+<span class="fc" id="L100">        chatsList</span>
+<span class="fc bfc" id="L101" title="All 4 branches covered.">            .filter { it.id == chatId }</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            .ifEmpty { throw ChatNotFound(&quot;вњ– Р§Р°С‚ РЅРµ РЅР°Р№РґРµРЅ!&quot;) }</span>
+
+<span class="fc" id="L104">        return messagesList</span>
+<span class="pc bpc" id="L105" title="1 of 6 branches missed.">            .filter { it.chatId == chatId &amp;&amp; it.id &gt;= lastMessageId }</span>
+<span class="fc" id="L106">            .take(count)</span>
     }
 
     fun getUnreadChatsCount(userId: Int): Int {
         //РќРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹РјРё СЃС‡РёС‚Р°РµРј СЃРѕРѕР±С‰РµРЅРёСЏ РІ СЃС‚Р°С‚СѓСЃРµ !read, Рё С‚РѕР»СЊРєРѕ РµСЃР»Рё С‚Р°РєРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚РїСЂР°РІР»РµРЅРѕ РЅРµ РЅР°РјРё
-<span class="fc" id="L104">        var chatsIdList = listOf&lt;Int&gt;()</span>
-<span class="fc" id="L105">        println(&quot;\nРќРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ РІ С‡Р°С‚Р°С…:&quot;)</span>
-<span class="fc bfc" id="L106" title="All 6 branches covered.">        messagesList.filter { it.receiverId == userId &amp;&amp; !it.read }.forEach {</span>
-<span class="fc" id="L107">            println(&quot;- ${it.text} [РќРµ РїСЂРѕС‡РёС‚Р°РЅРѕ] (chatId: ${it.chatId})&quot;)</span>
-<span class="pc bpc" id="L108" title="1 of 2 branches missed.">            if (chatsIdList.indexOf(it.chatId) == -1) chatsIdList += it.chatId</span>
-<span class="fc" id="L109">        }</span>
-        //return chatsList.count{it.id in chatsIdList }
-<span class="fc" id="L111">        return chatsIdList.count()</span>
+        //РўР°РєР¶Рµ, РІ РѕРґРЅРѕРј С‡Р°С‚Рµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р±РѕР»РµРµ РѕРґРЅРѕРіРѕ РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ, РїРѕСЌС‚РѕРјСѓ РїРѕРґСЃС‡РёС‚С‹РІР°С‚СЊ РєРѕР»-РІРѕ С‡Р°С‚РѕРІ СЃ РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹РјРё СЃРѕРѕР±С‰РµРЅРёСЏРјРё Р±СѓРґРµРј СЃ СѓС‡РµС‚РѕРј СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё Id С‡Р°С‚Р°
+
+<span class="fc" id="L113">        print(&quot;\nРќРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ РІ С‡Р°С‚Р°С…:&quot;)</span>
+<span class="fc" id="L114">        return messagesList</span>
+<span class="fc bfc" id="L115" title="All 6 branches covered.">            .filter { it.receiverId == userId &amp;&amp; !it.read }</span>
+<span class="fc" id="L116">            .fold(</span>
+<span class="fc" id="L117">                Pair(</span>
+<span class="fc" id="L118">                    listOf&lt;Int&gt;(),</span>
+<span class="fc" id="L119">                    &quot;&quot;</span>
+                )
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">            ) { acc, msg -&gt; (if (acc.first.indexOf(msg.chatId) == -1) acc.first + msg.chatId else acc.first) to acc.second + &quot;\n- ${msg.text} [РќРµ РїСЂРѕС‡РёС‚Р°РЅРѕ] (chatId: ${msg.chatId})&quot; }</span>
+<span class="fc" id="L122">            .also { println(it.second) }.first.count()</span>
     }
 
-    fun clearAllData(){
-<span class="fc" id="L115">        chatsList.clear()</span>
-<span class="fc" id="L116">        messagesList.clear()</span>
-<span class="fc" id="L117">    }</span>
+    fun clearAllData() {
+<span class="fc" id="L126">        chatsList.clear()</span>
+<span class="fc" id="L127">        messagesList.clear()</span>
+<span class="fc" id="L128">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
