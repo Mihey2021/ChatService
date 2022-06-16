@@ -15,13 +15,8 @@ object ChatService {
 
     fun sendMessage(senderUser: Users, receiverUser: Users, text: String): Boolean {
 
-        var filterChatsList = getChatList(senderUser, receiverUser)
-
-        //Проверим есть ли ранее созданный чат между этими пользователями и создадим его, если такого чата нет
-        if (filterChatsList.isEmpty()) {
-            createChat(senderUser, receiverUser)
-            filterChatsList = getChatList(senderUser, receiverUser)
-        }
+        val filterChatsList = getChatList(senderUser, receiverUser)
+            .ifEmpty { listOf(createChat(senderUser, receiverUser)) }
 
         val currentChat = filterChatsList[0]
         val msgId = if (messagesList.isEmpty()) 0 else messagesList.last().id + 1
@@ -40,9 +35,11 @@ object ChatService {
     fun getAllChatsForUser(user: Users) =
         chatsList.filter { it.memberUsers.user1 == user || it.memberUsers.user2 == user }
 
-    fun createChat(senderUser: Users, receiverUser: Users): Boolean {
+    fun createChat(senderUser: Users, receiverUser: Users): Chat {
         val chatId = if (chatsList.isEmpty()) 0 else chatsList.last().id + 1
-        return chatsList.add(Chat(chatId, senderUser vs receiverUser))
+        val newChat = Chat(chatId, senderUser vs receiverUser)
+        chatsList.add(newChat)
+        return newChat
     }
 
     fun markMessagesAsRead(chatId: Int, receiverId: Int) {
@@ -52,37 +49,46 @@ object ChatService {
 
     @Throws(ChatNotFound::class)
     fun deleteChat(chatId: Int): Boolean {
-        val filterChatList = chatsList.filter { it.id == chatId }.toList()
-        if (filterChatList.isEmpty()) throw ChatNotFound("✖ Чат не найден!")
-        val filterMessagesList = messagesList.filter { it.chatId == chatId }.toList()
-        filterMessagesList.forEach { messagesList.remove(it) }
-        filterChatList.forEach { chatsList.remove(it) }
+        chatsList
+            .filter { it.id == chatId }
+            .ifEmpty { throw ChatNotFound("✖ Чат не найден!") }
+            .forEach { chatsList.remove(it) }
+
+        messagesList
+            .filter { it.chatId == chatId }
+            .forEach { messagesList.remove(it) }
         return true
     }
 
     @Throws(MessageNotFound::class)
     fun editMessage(messageId: Int, newText: String): Messages {
-        val filterMessagesList = messagesList.filter { it.id == messageId }
+        val filterMessagesList = messagesList
+            .filter { it.id == messageId }
+            .ifEmpty { throw MessageNotFound("✖ Сообщение не найдено!") }
 
-        if (filterMessagesList.isEmpty()) throw MessageNotFound("✖ Сообщение не найдено!")
-        var msg = filterMessagesList[0].copy(text = newText)
+        val msg = filterMessagesList[0].copy(text = newText)
         messagesList[messagesList.indexOf(filterMessagesList[0])] = msg
         return messagesList[messagesList.indexOf(msg)]
     }
 
     @Throws(MessageNotFound::class)
     fun deleteMessage(msgId: Int): Boolean {
-        val filterMessagesList = messagesList.filter { it.id == msgId }
-        if (filterMessagesList.isEmpty()) throw MessageNotFound("✖ Сообщение не найдено!")
-        val msg = filterMessagesList[0]
-        val filterMessagesInChat = messagesList.filter { it.chatId == msg.chatId }
-        //Если это единственное оставшееся сообщение в чате, удалим весь чат
-        if (filterMessagesInChat.size == 1) {
-            val filterChatList = chatsList.filter { it.id == msg.chatId }
-            println(" ❗ Это единственное сообщение в чате [${filterChatList[0]}]. Удаляю чат.")
-            deleteChat(msg.chatId)
-            return true
-        }
+        val msg = messagesList
+            .filter { msg -> msg.id == msgId }
+            .ifEmpty { throw MessageNotFound("✖ Сообщение не найдено!") }
+            .let { messages -> messages[0] }
+            .run {
+                messagesList
+                    .filter { it.chatId == this.chatId }
+                    .also {
+                        if (it.size == 1) {
+                            println(" ❗ Это единственное сообщение в чате [${chatsList.filter { it.id == this.chatId }[0]}]. Удаляю чат.")
+                            return deleteChat(this.chatId)
+                        }
+                    }
+                return@run this
+            }
+
         println("✔ Сообщение удалено")
         return messagesList.remove(msg)
     }
@@ -91,27 +97,32 @@ object ChatService {
 
     @Throws(ChatNotFound::class)
     fun getMessagesFromChat(chatId: Int, lastMessageId: Int, count: Int): List<Messages> {
-        if (chatsList.filter { it.id == chatId }.isEmpty()) throw ChatNotFound("✖ Чат не найден!")
-        val filterMessagesList = messagesList.filter { it.chatId == chatId }
-        val totalCount = if (count < 0) filterMessagesList.size else count
-        val countRec =
-            if (filterMessagesList.size >= lastMessageId + totalCount) lastMessageId + totalCount else filterMessagesList.size
-        return filterMessagesList.subList(lastMessageId, countRec)
+        chatsList
+            .filter { it.id == chatId }
+            .ifEmpty { throw ChatNotFound("✖ Чат не найден!") }
+
+        return messagesList
+            .filter { it.chatId == chatId && it.id >= lastMessageId }
+            .take(count)
     }
 
     fun getUnreadChatsCount(userId: Int): Int {
         //Непрочитанными считаем сообщения в статусе !read, и только если такое сообщение отправлено не нами
-        var chatsIdList = listOf<Int>()
-        println("\nНепрочитанные сообщения в чатах:")
-        messagesList.filter { it.receiverId == userId && !it.read }.forEach {
-            println("- ${it.text} [Не прочитано] (chatId: ${it.chatId})")
-            if (chatsIdList.indexOf(it.chatId) == -1) chatsIdList += it.chatId
-        }
-        //return chatsList.count{it.id in chatsIdList }
-        return chatsIdList.count()
+        //Также, в одном чате может быть более одного непрочитанного сообщения, поэтому подсчитывать кол-во чатов с непрочитанными сообщениями будем с учетом уникальности Id чата
+
+        print("\nНепрочитанные сообщения в чатах:")
+        return messagesList
+            .filter { it.receiverId == userId && !it.read }
+            .fold(
+                Pair(
+                    listOf<Int>(),
+                    ""
+                )
+            ) { acc, msg -> (if (acc.first.indexOf(msg.chatId) == -1) acc.first + msg.chatId else acc.first) to acc.second + "\n- ${msg.text} [Не прочитано] (chatId: ${msg.chatId})" }
+            .also { println(it.second) }.first.count()
     }
 
-    fun clearAllData(){
+    fun clearAllData() {
         chatsList.clear()
         messagesList.clear()
     }

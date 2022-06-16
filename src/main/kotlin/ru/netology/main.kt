@@ -5,7 +5,7 @@ import ru.netology.exceptions.ChatNotFound
 import ru.netology.exceptions.MessageNotFound
 import ru.netology.services.ChatService
 
-fun main(args: Array<String>) {
+fun main() {
     val userYou = Users(0, "Вы")
     val userAleksandr = Users(1, "Саша")
     val userTanya = Users(2, "Таня")
@@ -20,6 +20,7 @@ fun main(args: Array<String>) {
     ChatService.sendMessage(userYou, userTanya, "Сообщение от Вас для Тани")
     ChatService.sendMessage(userIgor, userYou, "Сообщение от Игоря для Вас")
     ChatService.sendMessage(userYou, userIgor, "Ваш ответ Игорю")
+    ChatService.sendMessage(userEgor, userYou, "Второе сообщение от Егора для Вас")
 
     printChatListAndMessages(userYou)
 
@@ -68,7 +69,7 @@ fun main(args: Array<String>) {
     printChatListAndMessages(userYou)
 
     println("\nПолучим 2 сообщения из чата с Надей:")
-    ChatService.getMessagesFromChat(1, 1, 2)
+    ChatService.getMessagesFromChat(1, 3, 2)
         .forEach { println(" - ${it.text} [${if (it.read) "Прочитано" else "Не прочитано"}]") }
 
 
